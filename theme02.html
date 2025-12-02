@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jakub Růžička - Webový Designer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000000;
+            --white: #FFFFFF;
+            --gray: #999999;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 100px;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--black);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 2rem 0;
+            background: transparent;
+            mix-blend-mode: difference;
+        }
+
+        nav::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150%;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: -1;
+            mask-image: linear-gradient(180deg, black 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(180deg, black 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1rem;
+            font-weight: 900;
+            color: var(--white);
+            text-decoration: none;
+            letter-spacing: 3px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.5;
+        }
+
+        .menu-toggle {
+            display: none;
+            width: 30px;
+            height: 24px;
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .menu-toggle span {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--white);
+            border-radius: 10px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .menu-toggle span:nth-child(1) { top: 0; }
+        .menu-toggle span:nth-child(2) { top: 50%; transform: translateY(-50%); }
+        .menu-toggle span:nth-child(3) { bottom: 0; }
+
+        .menu-toggle.active span:nth-child(1) {
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            transform: translateY(-50%) scaleX(0);
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            bottom: 50%;
+            transform: translateY(50%) rotate(-45deg);
+        }
+
+        /* Sections */
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 3rem;
+            scroll-margin-top: 80px;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Hero */
+        .hero {
+            padding-top: 12rem;
+            position: relative;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(4rem, 12vw, 10rem);
+            font-weight: 900;
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+            opacity: 0;
+            margin-bottom: 2rem;
+        }
+
+        .hero-number {
+            font-size: clamp(8rem, 20vw, 18rem);
+            font-weight: 900;
+            line-height: 1;
+            opacity: 0.1;
+            text-align: right;
+            opacity: 0;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            max-width: 500px;
+            color: var(--gray);
+            margin-bottom: 3rem;
+            opacity: 0;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            opacity: 0;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 0.85rem;
+            font-weight: 900;
+            text-decoration: none;
+            border: 2px solid var(--white);
+            cursor: pointer;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            background: transparent;
+            color: var(--white);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--white);
+            transition: all 0.5s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 120%;
+            height: 120%;
+        }
+
+        .btn:hover {
+            color: var(--black);
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* About */
+        .about {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin-bottom: 2rem;
+            opacity: 0.5;
+        }
+
+        .section-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+            margin-bottom: 4rem;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--black);
+            margin-top: 4rem;
+        }
+
+        .about-item {
+            background: var(--white);
+            padding: 4rem 3rem;
+            transition: all 0.4s ease;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .about-item:hover {
+            background: var(--black);
+            color: var(--white);
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            opacity: 0.3;
+        }
+
+        .about-item h3 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .about-item p {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            opacity: 0.7;
+        }
+
+        .about-item:hover p {
+            opacity: 1;
+        }
+
+        /* Services */
+        .services {
+            background: var(--black);
+        }
+
+        .services-list {
+            margin-top: 6rem;
+        }
+
+        .service-item {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem 0;
+            display: grid;
+            grid-template-columns: 100px 1fr 200px;
+            gap: 4rem;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            opacity: 0;
+        }
+
+        .service-item:hover {
+            padding-left: 2rem;
+            border-color: var(--white);
+        }
+
+        .service-number {
+            font-size: 2rem;
+            font-weight: 900;
+            opacity: 0.3;
+        }
+
+        .service-item h3 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .service-item p {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: right;
+        }
+
+        /* Portfolio */
+        .portfolio {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+            background: var(--black);
+            margin-top: 4rem;
+        }
+
+        .portfolio-item {
+            aspect-ratio: 1;
+            background: var(--white);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .portfolio-bg {
+            position: absolute;
+            inset: 0;
+            background: var(--black);
+            transform: scale(0);
+            transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .portfolio-item:hover .portfolio-bg {
+            transform: scale(1);
+        }
+
+        .portfolio-content {
+            position: absolute;
+            inset: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            z-index: 1;
+            transition: color 0.4s ease;
+        }
+
+        .portfolio-item:hover .portfolio-content {
+            color: var(--white);
+        }
+
+        .portfolio-number {
+            font-size: 6rem;
+            font-weight: 900;
+            line-height: 1;
+            opacity: 0.1;
+            margin-bottom: 2rem;
+        }
+
+        .portfolio-content h3 {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .portfolio-content p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+
+        /* Contact */
+        .contact {
+            background: var(--black);
+            text-align: center;
+            padding: 15rem 3rem;
+        }
+
+        .contact .section-title {
+            color: var(--white);
+            margin-bottom: 4rem;
+        }
+
+        .contact-email {
+            display: inline-block;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 900;
+            color: var(--white);
+            text-decoration: none;
+            letter-spacing: -2px;
+            border-bottom: 3px solid var(--white);
+            padding-bottom: 0.5rem;
+            transition: all 0.4s ease;
+            opacity: 0;
+        }
+
+        .contact-email:hover {
+            color: var(--gray);
+            border-color: var(--gray);
+            letter-spacing: 2px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--black);
+            padding: 4rem 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .footer-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .footer-info h4 {
+            font-size: 0.8rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: right;
+        }
+
+        .footer-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 0.5;
+        }
+
+        /* Mobile */
+        @media (max-width: 968px) {
+            .menu-toggle {
+                display: flex;
+                z-index: 1002;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                flex-direction: column;
+                padding: 8rem 3rem 3rem;
+                gap: 3rem;
+                background: rgba(0, 0, 0, 0.98);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                transform: translateY(-100%);
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+                mix-blend-mode: normal;
+                justify-content: center;
+                z-index: 1001;
+            }
+
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: all;
+            }
+
+            .nav-links a {
+                font-size: 2rem;
+                font-weight: 900;
+                letter-spacing: -1px;
+                opacity: 0;
+                transform: translateY(30px);
+                transition: all 0.3s ease;
+            }
+
+            .nav-links.active a {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .nav-links.active a:nth-child(1) {
+                transition-delay: 0.1s;
+            }
+
+            .nav-links.active a:nth-child(2) {
+                transition-delay: 0.2s;
+            }
+
+            .nav-links.active a:nth-child(3) {
+                transition-delay: 0.3s;
+            }
+
+            .nav-links.active a:nth-child(4) {
+                transition-delay: 0.4s;
+            }
+
+            .nav-links a:hover {
+                opacity: 0.5;
+                transform: translateX(20px);
+            }
+
+            /* Blur overlay for content behind menu */
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.5s ease;
+                z-index: 999;
+            }
+
+            body.menu-open::before {
+                opacity: 1;
+            }
+
+            body.menu-open {
+                overflow: hidden;
+            }
+
+            section {
+                padding: 6rem 2rem;
+            }
+
+            .hero {
+                padding-top: 10rem;
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .hero-number {
+                order: -1;
+                text-align: left;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-item {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 2rem 0;
+            }
+
+            .service-item p {
+                text-align: left;
+            }
+
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .footer-links {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav id="nav">
+        <div class="nav-container">
+            <a href="#" class="logo">JR</a>
+            <button class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#o-mne">O MNĚ</a></li>
+                <li><a href="#sluzby">SLUŽBY</a></li>
+                <li><a href="#portfolio">PORTFOLIO</a></li>
+                <li><a href="#kontakt">KONTAKT</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div>
+                    <h1>JAKUB<br>RŮŽIČKA</h1>
+                    <p>Webový designer zaměřený na minimalistický přístup, čistou typografii a funkční design. Vytvářím digitální zážitky, které překvapují svou jednoduchostí.</p>
+                    <div class="cta-buttons">
+                        <a href="#kontakt" class="btn"><span>ZAČÍT PROJEKT</span></a>
+                        <a href="#portfolio" class="btn"><span>PRÁCE</span></a>
+                    </div>
+                </div>
+                <div class="hero-number">2025</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="o-mne" class="about">
+        <div class="container">
+            <div class="section-label">FILOZOFIE</div>
+            <h2 class="section-title">DESIGN JE<br>O ŘEŠENÍ<br>PROBLÉMŮ</h2>
+            <div class="about-grid">
+                <div class="about-item">
+                    <div class="icon">━</div>
+                    <h3>PŘESNOST</h3>
+                    <p>Každý pixel na svém místě. Preciznost v detailech vytváří dokonalý celek a odlišuje průměr od výjimečnosti.</p>
+                </div>
+                <div class="about-item">
+                    <div class="icon">┃</div>
+                    <h3>HARMONIE</h3>
+                    <p>Rovnováha mezi formou a funkcí. Design, který nejen vypadá dobře, ale především dobře funguje pro uživatele.</p>
+                </div>
+                <div class="about-item">
+                    <div class="icon">╋</div>
+                    <h3>SYSTÉM</h3>
+                    <p>Konzistentní designový systém zajišťuje soudržnost napříč všemi platformami a zaručuje stabilitu značky.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sluzby" class="services">
+        <div class="container">
+            <div class="section-label">CO NABÍZÍM</div>
+            <h2 class="section-title">SLUŽBY</h2>
+            <div class="services-list">
+                <div class="service-item">
+                    <div class="service-number">01</div>
+                    <h3>WEB DESIGN</h3>
+                    <p>DESIGN · UX · PROTOTYPING</p>
+                </div>
+                <div class="service-item">
+                    <div class="service-number">02</div>
+                    <h3>BRANDING</h3>
+                    <p>IDENTITY · GUIDELINES · STRATEGY</p>
+                </div>
+                <div class="service-item">
+                    <div class="service-number">03</div>
+                    <h3>DEVELOPMENT</h3>
+                    <p>CODE · ANIMATION · OPTIMIZATION</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <div class="section-label">VYBRANÉ PROJEKTY</div>
+            <h2 class="section-title">PORTFOLIO</h2>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <div class="portfolio-bg"></div>
+                    <div class="portfolio-content">
+                        <div class="portfolio-number">01</div>
+                        <h3>MINIMAL<br>STUDIO</h3>
+                        <p>BRANDING · WEB</p>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-bg"></div>
+                    <div class="portfolio-content">
+                        <div class="portfolio-number">02</div>
+                        <h3>E-COMMERCE<br>PLATFORM</h3>
+                        <p>UI/UX · DEV</p>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-bg"></div>
+                    <div class="portfolio-content">
+                        <div class="portfolio-number">03</div>
+                        <h3>CREATIVE<br>LAB</h3>
+                        <p>WEB · IDENTITY</p>
+                    </div>
+                </div>
+                <div class="portfolio-item">
+                    <div class="portfolio-bg"></div>
+                    <div class="portfolio-content">
+                        <div class="portfolio-number">04</div>
+                        <h3>APP<br>DASHBOARD</h3>
+                        <p>INTERFACE · UX</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="kontakt" class="contact">
+        <div class="container">
+            <div class="section-label">POJĎME TVOŘIT</div>
+            <h2 class="section-title">MÁTE<br>PROJEKT?</h2>
+            <a href="mailto:ahoj@jakubruzicka.cz" class="contact-email">AHOJ@JAKUBRUZICKA.CZ</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-info">
+                <h4>© 2025 JAKUB RŮŽIČKA</h4>
+                <p style="color: var(--gray); font-size: 0.9rem;">Webový designer<br>Praha, Česká republika</p>
+            </div>
+            <div class="footer-links">
+                <a href="#">LINKEDIN</a>
+                <a href="#">DRIBBBLE</a>
+                <a href="#">BEHANCE</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Mobile menu
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const body = document.body;
+
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            body.classList.toggle('menu-open');
+        });
+
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                body.classList.remove('menu-open');
+            });
+        });
+
+        // Hero animations
+        gsap.to('.hero h1', { opacity: 1, x: 0, duration: 1, delay: 0.3 });
+        gsap.to('.hero-number', { opacity: 0.1, x: 0, duration: 1, delay: 0.4 });
+        gsap.to('.hero p', { opacity: 1, y: 0, duration: 0.8, delay: 0.5 });
+        gsap.to('.cta-buttons', { opacity: 1, y: 0, duration: 0.8, delay: 0.7 });
+
+        // About items
+        gsap.utils.toArray('.about-item').forEach((item, i) => {
+            gsap.to(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: 'top 80%',
+                    toggleActions: 'play none none reverse'
+                },
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                delay: i * 0.1
+            });
+        });
+
+        // Service items
+        gsap.utils.toArray('.service-item').forEach((item, i) => {
+            gsap.to(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: 'top 80%',
+                    toggleActions: 'play none none reverse'
+                },
+                opacity: 1,
+                x: 0,
+                duration: 0.8,
+                delay: i * 0.1
+            });
+        });
+
+        // Portfolio items
+        gsap.utils.toArray('.portfolio-item').forEach((item, i) => {
+            gsap.to(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: 'top 80%',
+                    toggleActions: 'play none none reverse'
+                },
+                opacity: 1,
+                scale: 1,
+                duration: 0.8,
+                delay: i * 0.1
+            });
+        });
+
+        // Contact email
+        gsap.to('.contact-email', {
+            scrollTrigger: {
+                trigger: '.contact-email',
+                start: 'top 80%',
+                toggleActions: 'play none none reverse'
+            },
+            opacity: 1,
+            y: 0,
+            duration: 0.8
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
